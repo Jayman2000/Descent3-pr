@@ -1035,6 +1035,9 @@ ubyte Use_motion_blur = 0;
 // The "root" directory of the D3 file tree
 char Base_directory[_MAX_PATH];
 
+// An alternate "root" directory
+char Additional_directory[_MAX_PATH];
+
 extern int Min_allowed_frametime;
 
 extern bool Mem_low_memory_mode;
@@ -1441,6 +1444,19 @@ void InitIOSystems(bool editor) {
 
   ddio_SetWorkingDir(Base_directory);
 
+  auto additionaldirarg = FindArg("-additionaldir");
+  if (additionaldirarg) {
+    const char *additionaldirval = GetArg(additionaldirarg + 1);
+    if (additionaldirval == NULL) {
+      mprintf((0, "ERROR: no path was specified for -additionaldir. USAGE: -additionaldir <path>\n"));
+    } else {
+      assert(("If this isn’t true, then the following strcpy isn’t safe.", MAX_CHARS_PER_ARG < _MAX_PATH));
+      strcpy(Additional_directory, additionaldirval);
+    }
+  } else {
+    Additional_directory[0] = '\0';
+  }
+
   Descent->set_defer_handler(D3DeferHandler);
 
   if (!editor && !FindArg("-windowed")) {
@@ -1490,15 +1506,16 @@ void InitIOSystems(bool editor) {
   // Init hogfiles
   INIT_MESSAGE(("Checking for HOG files."));
   int d3_hid = -1, extra_hid = -1, sys_hid = -1, extra13_hid = -1;
+  const char *filename;
+  // TODO: Replace all occurrences of fullname with filename.
   char fullname[_MAX_PATH];
 
 #ifdef DEMO
-  // DAJ	d3_hid = cf_OpenLibrary("d3demo.hog");
-  ddio_MakePath(fullname, LocalD3Dir, "d3demo.hog", NULL);
+  filename = "d3demo.hog";
 #else
-  ddio_MakePath(fullname, LocalD3Dir, "d3.hog", NULL);
+  filename = "d3.hog";
 #endif
-  d3_hid = cf_OpenLibrary(fullname);
+  d3_hid = cf_FindAndOpenLibrary(filename);
 
 #ifdef __LINUX__
 #ifndef MACOSX

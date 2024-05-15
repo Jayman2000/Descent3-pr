@@ -181,6 +181,9 @@ extern bool Descent_overrided_intro;
 // The "root" directory of the D3 file tree
 extern char Base_directory[];
 
+// An alternate "root" directory
+extern char Additional_directory[];
+
 //	---------------------------------------------------------------------------
 //	Globals
 

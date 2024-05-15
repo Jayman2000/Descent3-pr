@@ -79,6 +79,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <initializer_list>
 
 #include "pstypes.h"
 
@@ -130,6 +131,27 @@ bool cf_IsFileInHog(const char *filename, const char *hogname);
 //			be a fully-specified path name, or the current directory must not change.
 // Returns: 0 if error, else library handle that can be used to close the library
 int cf_OpenLibrary(const char *libname);
+
+// TODO: Fix this doc comment for the function’s new signature.
+// Searches one or more directories in order to open a HOG file.  Future calls
+// to cfopen(), etc. will look in the HOG file if it’s found.
+//
+// Parameters:  relative_path - a path to a HOG file. Most of the time this
+//                              will just be the name of the HOG file.  If
+//                              you’re looking for a HOG file in a
+//                              subdirectory, then you can include the
+//                              subdirectory in the value of relative_path.
+//
+//              start_dirs    - a list of directories where we might find
+//                              relative_path.
+//
+// NOTE: Each item in start_dirs must be valid for the entire execution of the
+// program.  Therefore, they should either be absolute paths, or the current
+// directory must not change.
+//
+// Returns: 0 if error, else library handle that can be used to close the
+// library.
+int cf_FindAndOpenLibrary(const char *relative_path);
 
 // Closes a library file.
 // Parameters:  handle: the handle returned by cf_OpenLibrary()
