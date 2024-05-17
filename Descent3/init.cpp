@@ -1032,9 +1032,6 @@ static bool Graphics_init = false;
 static bool Title_bitmap_init = false;
 ubyte Use_motion_blur = 0;
 
-// The "root" directory of the D3 file tree
-char Base_directory[_MAX_PATH];
-
 extern int Min_allowed_frametime;
 
 extern bool Mem_low_memory_mode;
@@ -1420,26 +1417,26 @@ void InitIOSystems(bool editor) {
   ddio_init_info io_info;
   int dirlen = _MAX_PATH;
 
-  // Set the base directory
+  // Set the local directory
   int dirarg = FindArg("-setdir");
   int exedirarg = FindArg("-useexedir");
   if (dirarg) {
-    strcpy(Base_directory, GameArgs[dirarg + 1]);
+    strcpy(LocalD3Dir, GameArgs[dirarg + 1]);
   } else if (exedirarg) {
-    strcpy(Base_directory, GameArgs[0]);
-    int len = strlen(Base_directory);
+    strcpy(LocalD3Dir, GameArgs[0]);
+    int len = strlen(LocalD3Dir);
     for (int i = (len - 1); i >= 0; i--) {
       if (i == '\\') {
-        Base_directory[i] = '\0';
+        LocalD3Dir[i] = '\0';
       }
     }
-    INIT_MESSAGE(("Using working directory of %s\n", Base_directory));
-    mprintf((0, "Using working directory of %s\n", Base_directory));
+    INIT_MESSAGE(("Using working directory of %s\n", LocalD3Dir));
+    mprintf((0, "Using working directory of %s\n", LocalD3Dir));
   } else {
-    ddio_GetWorkingDir(Base_directory, sizeof(Base_directory));
+    ddio_GetWorkingDir(LocalD3Dir, sizeof(LocalD3Dir));
   }
 
-  ddio_SetWorkingDir(Base_directory);
+  ddio_SetWorkingDir(LocalD3Dir);
 
   Descent->set_defer_handler(D3DeferHandler);
 
@@ -2021,7 +2018,7 @@ void SetupTempDirectory(void) {
     strcpy(Descent3_temp_directory, GameArgs[t_arg + 1]);
   } else {
     // initialize it to custom/cache
-    ddio_MakePath(Descent3_temp_directory, Base_directory, "custom", "cache", NULL);
+    ddio_MakePath(Descent3_temp_directory, LocalD3Dir, "custom", "cache", NULL);
   }
 
   // verify that temp directory exists
@@ -2114,7 +2111,7 @@ void SetupTempDirectory(void) {
     break;
   }
   // restore working dir
-  ddio_SetWorkingDir(Base_directory);
+  ddio_SetWorkingDir(LocalD3Dir);
 }
 
 void DeleteTempFiles(void) {
@@ -2134,7 +2131,7 @@ void DeleteTempFiles(void) {
   }
 
   // restore directory
-  ddio_SetWorkingDir(Base_directory);
+  ddio_SetWorkingDir(LocalD3Dir);
 }
 
 /*

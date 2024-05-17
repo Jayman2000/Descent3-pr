@@ -443,7 +443,7 @@ int MainMultiplayerMenu() {
   char buffer[_MAX_PATH], fname[_MAX_PATH], fext[_MAX_PATH], fdir[_MAX_PATH];
   char search[256];
 
-  ddio_MakePath(search, Base_directory, "online", "*.d3c", NULL);
+  ddio_MakePath(search, LocalD3Dir, "online", "*.d3c", NULL);
 
   int dftidx = -1;
   dllcount = 0;

@@ -293,7 +293,7 @@ void WriteAmbientData() {
   CFILE *ofile;
 
 #ifndef NEWEDITOR
-  ddio_MakePath(filename, Base_directory, "data", "misc", AMBIENT_FILE_NAME, NULL);
+  ddio_MakePath(filename, LocalD3Dir, "data", "misc", AMBIENT_FILE_NAME, NULL);
 #else
   ddio_MakePath(filename, D3HogDir, "data", "misc", AMBIENT_FILE_NAME, NULL);
 #endif

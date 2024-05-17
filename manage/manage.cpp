@@ -671,10 +671,6 @@ int mng_LoadTableFiles(int show_progress) {
 // This is for initting tables on STAND_ALONE, if the network is down, or if
 // the user doesn't want network support
 int mng_InitLocalTables() {
-  // Set the local table directory from the base directory
-  strcpy(LocalD3Dir, Base_directory);
-  mprintf((1, "Local dir:%s\n", LocalD3Dir));
-
   // Make the CFILE system first look at our local directories.  If the goods aren't
   // found there, try out on the network
   ddio_MakePath(LocalTableDir, LocalD3Dir, "data", "tables", NULL);

@@ -54,7 +54,7 @@ bool InitCinematics() {
   }
 
   char path[_MAX_PATH];
-  ddio_MakePath(path, Base_directory, "movies", NULL);
+  ddio_MakePath(path, LocalD3Dir, "movies", NULL);
 
   if (mve_Init(path, Sound_card_name) != MVELIB_NOERROR)
     return false;

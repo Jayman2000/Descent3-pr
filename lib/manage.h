@@ -106,7 +106,7 @@ extern int Network_up, Stand_alone;
 // Starting editor?
 extern int Starting_editor, Loading_locals, Loading_addon_table;
 
-extern char LocalD3Dir[];
+extern char LocalD3Dir[TABLE_NAME_LEN];
 extern char NetD3Dir[];
 extern char TableFilename[];
 extern char TableLockFilename[];

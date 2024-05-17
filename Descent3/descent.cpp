@@ -495,7 +495,7 @@ void Descent3() {
         }
 #endif
 
-        ddio_MakePath(intropath, Base_directory, "movies", "dolby1.mv8", NULL);
+        ddio_MakePath(intropath, LocalD3Dir, "movies", "dolby1.mv8", NULL);
 
         if (remote_path || (cfexist(intropath))) {
           const char *t = GetMultiCDPath("dolby1.mv8");
@@ -530,7 +530,7 @@ void Descent3() {
           intro_movie_name = base_intro_movie_name;
         }
 
-        ddio_MakePath(intropath, Base_directory, "movies", intro_movie_name, NULL);
+        ddio_MakePath(intropath, LocalD3Dir, "movies", intro_movie_name, NULL);
 
         if (remote_path || (cfexist(intropath))) {
           const char *t = GetMultiCDPath(intro_movie_name);
