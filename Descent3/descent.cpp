@@ -497,10 +497,8 @@ void Descent3() {
 
         ddio_MakePath(intropath, Base_directory, "movies", "dolby1.mv8", NULL);
 
-        if (remote_path || (cfexist(intropath))) {
-          const char *t = GetMultiCDPath("dolby1.mv8");
-          if (t)
-            PlayMovie(t);
+        if (cfexist(intropath)) {
+          PlayMovie(intropath);
         }
 
         int intro_movie_arg;
@@ -532,10 +530,8 @@ void Descent3() {
 
         ddio_MakePath(intropath, Base_directory, "movies", intro_movie_name, NULL);
 
-        if (remote_path || (cfexist(intropath))) {
-          const char *t = GetMultiCDPath(intro_movie_name);
-          if (t)
-            PlayMovie(t);
+        if (cfexist(intropath)) {
+          PlayMovie(intropath);
         }
       }
 
@@ -824,89 +820,3 @@ file_vols file_volumes[] = {
     {"d3voice1.hog", "missions", 1, true}, {"d3voice2.hog", "missions", 2, true}};
 
 int num_cd_files = sizeof(file_volumes) / sizeof(file_vols);
-
-// This function figures out whether or not a file needs to be loaded off of
-// CD or off of the local drive. If it needs to come from a CD, it figures out
-// which CD and prompts the user to enter that CD. If they hit cancel, it
-// returns NULL.
-const char *GetMultiCDPath(const char *file) {
-  static char filepath[_MAX_PATH * 2];
-  static char fullpath[_MAX_PATH * 2];
-  int volume = 0;
-  int i;
-
-  if (file == NULL)
-    return NULL;
-  if (*file == '\0')
-    return NULL;
-
-  // see if there is a command line override for the name of the intro movie
-  int intro_movie_arg = FindArg("-intro");
-  char temp_filename[256];
-
-  // Clear out any old path
-  // memset(filepath,0,_MAX_PATH*2);
-  filepath[0] = '\0';
-
-  for (i = 0; i < num_cd_files; i++) {
-    char *vol_filename;
-    vol_filename = file_volumes[i].file;
-
-    // check to see if we need to override this string (for intro movie)
-    if (intro_movie_arg > 0 && !stricmp(vol_filename, "intro.mve")) {
-      // we have to override this intro movie
-      char extension[16], *p;
-      p = extension;
-      ddio_SplitPath(GameArgs[intro_movie_arg + 1], NULL, temp_filename, extension);
-      while (*p) {
-        *p = tolower(*p);
-        p++;
-      }
-      strcat(temp_filename, extension);
-      vol_filename = temp_filename;
-    }
-
-    if (strcmpi(vol_filename, file) == 0) {
-      volume = file_volumes[i].volume;
-      ddio_MakePath(fullpath, LocalD3Dir, file_volumes[i].localpath, file, NULL);
-      // See if the file is in the local dir already.
-      if (cfexist(fullpath)) {
-        return fullpath;
-      }
-#ifdef _DEBUG
-      else if (strcmpi(file_volumes[i].localpath, "movies") == 0) {
-        // if one specified a directory where the movies are located.
-        int arg = FindArg("-moviedir");
-        if (arg) {
-          ddio_MakePath(fullpath, GameArgs[arg + 1], file, NULL);
-          return fullpath;
-        }
-      }
-#endif
-      break;
-    }
-  }
-  // This is a file we don't know about
-  if (i == num_cd_files)
-    return file;
-
-  if (volume) {
-    const char *p = GetCDVolume(volume);
-    if (p) {
-      // If it's DVD, we need to get the proper files for the language
-      if ((CD_inserted == 3) && (file_volumes[i].localized)) {
-        ddio_MakePath(filepath, p, file_volumes[i].localpath, Oem_language_dirs[Localization_GetLanguage()], file,
-                      NULL);
-      } else {
-        ddio_MakePath(filepath, p, file_volumes[i].localpath, file, NULL);
-      }
-      // strcpy(filepath,p);
-      // strcat(filepath,file);
-      return filepath;
-    } else {
-      return NULL;
-    }
-  }
-
-  return NULL;
-}

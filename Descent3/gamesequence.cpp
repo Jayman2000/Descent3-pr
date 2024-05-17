@@ -1318,16 +1318,11 @@ void CheckHogfile() {
   if (new_mn3) {
     // close the mission hog file and open the new one
     mn3_Close();
-    const char *hogp = GetMultiCDPath(new_mn3);
-    if (hogp) {
-      char hogpath[_MAX_PATH * 2];
-      strcpy(hogpath, hogp);
-      mn3_Open(hogpath);
-      mem_free(Current_mission.filename);
-      Current_mission.filename = mem_strdup(new_mn3);
-    } else {
-      SetFunctionMode(MENU_MODE);
-    }
+    char absolute_path[_MAX_PATH];
+    ddio_MakePath(absolute_path, D3MissionsDir, new_mn3, NULL);
+    mn3_Open(absolute_path);
+    mem_free(Current_mission.filename);
+    Current_mission.filename = mem_strdup(new_mn3);
   }
 }
 
