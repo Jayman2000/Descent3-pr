@@ -39,6 +39,7 @@
 #include "cfile.h"
 #include "hogfile.h" //info about library file
 #include "mem.h"
+#include "descent.h"
 
 // Library structures
 typedef struct {
@@ -187,6 +188,29 @@ int cf_OpenLibrary(const char *libname) {
   lib->file = fp;
   // Success.  Return the handle
   return lib->handle;
+}
+
+/* TODO: Doc string
+ * Something to mention in the doc string: this function makes it so that the
+ * last additional directory has priority over the second to last additional
+ * directory. The second to last one has priority over the third to last one.
+ * The first one has priority over the base directory.
+ */
+int cf_FindAndOpenLibrary(const char *relative_path) {
+  char full_path[_MAX_PATH];
+
+  for (auto i = MAX_ARGS - 1; i >= 0; i--) {
+    if (Additional_directories[i][0] != '\0') {
+      ddio_MakePath(full_path, Additional_directories[i], relative_path, NULL);
+      auto return_value = cf_OpenLibrary(full_path);
+      if (return_value != 0) {
+        return return_value;
+      }
+    }
+  }
+
+  ddio_MakePath(full_path, Base_directory, relative_path, NULL);
+  return cf_OpenLibrary(full_path);
 }
 
 /**

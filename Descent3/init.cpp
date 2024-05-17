@@ -1035,6 +1035,9 @@ ubyte Use_motion_blur = 0;
 // The "root" directory of the D3 file tree
 char Base_directory[_MAX_PATH];
 
+// Additional "root" directories.
+char Additional_directories[MAX_ARGS][_MAX_PATH];
+
 extern int Min_allowed_frametime;
 
 extern bool Mem_low_memory_mode;
@@ -1440,6 +1443,26 @@ void InitIOSystems(bool editor) {
   }
 
   ddio_SetWorkingDir(Base_directory);
+
+  auto additional_directories_i = 0;
+  auto command_line_i = 0;
+  int additionaldirarg;
+  while ((additional_directories_i < MAX_ARGS) && (additionaldirarg = FindArg("-additionaldir", command_line_i))) {
+    const char *additionaldirval = GetArg(additionaldirarg + 1);
+    if (additionaldirval == NULL) {
+      mprintf((0, "ERROR: no path was specified for -additionaldir. USAGE: -additionaldir <path>\n"));
+    } else {
+      assert(("If this isn’t true, then the following strcpy isn’t safe.", MAX_CHARS_PER_ARG < _MAX_PATH));
+      strcpy(Additional_directories[additional_directories_i], additionaldirval);
+    }
+
+    additional_directories_i++;
+    command_line_i = additionaldirarg + 2;
+  }
+  while (additional_directories_i < MAX_ARGS) {
+    Additional_directories[additional_directories_i][0] = '\0';
+    additional_directories_i++;
+  }
 
   Descent->set_defer_handler(D3DeferHandler);
 

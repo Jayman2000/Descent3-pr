@@ -149,6 +149,14 @@ bool cf_IsFileInHog(const char *filename, const char *hogname);
 // Returns: 0 if error, else library handle that can be used to close the library
 int cf_OpenLibrary(const char *libname);
 
+/* TODO: Doc string
+ * Something to mention in the doc string: this function makes it so that the
+ * last additional directory has priority over the second to last additional
+ * directory. The second to last one has priority over the third to last one.
+ * The first one has priority over the base directory.
+ */
+int cf_FindAndOpenLibrary(const char *relative_path);
+
 // Closes a library file.
 // Parameters:  handle: the handle returned by cf_OpenLibrary()
 void cf_CloseLibrary(int handle);

@@ -130,6 +130,7 @@
 
 #include <stdlib.h>
 #include "application.h"
+#include "args.h"
 
 // The name of this product
 #ifdef DEMO
@@ -180,6 +181,9 @@ extern bool Descent_overrided_intro;
 
 // The "root" directory of the D3 file tree
 extern char Base_directory[];
+
+// Additional "root" directories.
+extern char Additional_directories[][_MAX_PATH];
 
 //	---------------------------------------------------------------------------
 //	Globals
