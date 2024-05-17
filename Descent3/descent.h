@@ -213,11 +213,6 @@ function_mode GetFunctionMode();
 void CreateGameViewport(grViewport **vp);
 void DestroyGameViewport(grViewport *vp);
 
-// This function figures out whether or not a file needs to be loaded off of
-// CD or off of the local drive. If it needs to come from a CD, it figures out
-// which CD and prompts the user to enter that CD. If they hit cancel, it
-// returns NULL.
-const char *GetMultiCDPath(const char *file);
 const char *GetCDVolume(int cd_num);
 
 inline void CREATE_VIEWPORT(grViewport **vp) { CreateGameViewport(vp); }
