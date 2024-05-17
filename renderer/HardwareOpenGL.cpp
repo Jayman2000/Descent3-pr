@@ -56,7 +56,6 @@
 
 #include <algorithm>
 
-int FindArg(const char *);
 void rend_SetLightingState(light_state state);
 
 #define CHANGE_RESOLUTION_IN_FULLSCREEN

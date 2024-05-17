@@ -45,6 +45,7 @@
  */
 
 #include "debug.h"
+#include "args.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -365,7 +366,6 @@ void Debug_ConsoleExit() {
 #define MAX_ARGS 30
 #define MAX_CHARS_PER_ARG 100
 extern char GameArgs[MAX_ARGS][MAX_CHARS_PER_ARG];
-int FindArg(const char *which);
 
 bool Debug_ConsoleInit() {
   int n = 0;
