@@ -88,6 +88,7 @@
  * $NoKeywords: $
  */
 #include "ddio.h"
+#include "descent.h"
 #include "joystick.h"
 #include "pserror.h"
 #include <stdlib.h>
@@ -141,4 +142,15 @@ void ddio_Frame() {
   ddio_InternalKeyFrame();
   ddio_InternalMouseFrame();
   ddio_InternalJoyFrame();
+}
+
+std::filesystem::path ddio_FindRealPath(std::filesystem::path relative_path, std::filesystem::path starting_dir) {
+  if (starting_dir.empty()) {
+    starting_dir = (std::filesystem::path)Base_directory;
+  }
+  ASSERT(("realative_path should be a relative path.", relative_path.is_relative()));
+  ASSERT(("starting_dir should be an absolute path.", starting_dir.is_absolute()));
+  auto return_value = ddio_FindRealPathImplementation(relative_path, starting_dir);
+  ASSERT(("return_value should be an absolute path.", return_value.is_absolute()));
+  return return_value;
 }

@@ -1319,7 +1319,7 @@ void CheckHogfile() {
     // close the mission hog file and open the new one
     mn3_Close();
     char hogpath[_MAX_PATH];
-    ddio_MakePath(hogpath, D3MissionsDir, new_mn3, NULL);
+    ddio_MakePath(hogpath, "missions", new_mn3, NULL);
     mn3_Open(hogpath);
     mem_free(Current_mission.filename);
     Current_mission.filename = mem_strdup(new_mn3);

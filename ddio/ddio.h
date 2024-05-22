@@ -435,4 +435,7 @@ bool ddio_CreateLockFile(const std::filesystem::path& dir);
  */
 bool ddio_DeleteLockFile(const std::filesystem::path& dir);
 
+// TODO: Doc comment
+std::filesystem::path ddio_FindRealPath(std::filesystem::path relative_path, std::filesystem::path starting_dir = "");
+
 #endif
