@@ -605,7 +605,7 @@ int LoadMultiDLL(const char *name) {
   });
 
   // Make the hog filename
-  ddio_MakePath(lib_name, Base_directory.u8string().c_str(), "online", name, NULL);
+  ddio_MakePath(lib_name, "online", name, NULL);
   strcat(lib_name, ".d3c");
 // Make the dll filename
 #if defined(WIN32)
