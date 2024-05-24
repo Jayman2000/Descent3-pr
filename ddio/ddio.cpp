@@ -144,13 +144,20 @@ void ddio_Frame() {
   ddio_InternalJoyFrame();
 }
 
-std::filesystem::path ddio_FindRealPath(std::filesystem::path relative_path, std::filesystem::path starting_dir) {
-  if (starting_dir.empty()) {
-    starting_dir = (std::filesystem::path)Base_directory;
-  }
+std::filesystem::path ddio_FindRealPath(std::filesystem::path relative_path, std::vector<std::filesystem::path> starting_dirs) {
   ASSERT(("realative_path should be a relative path.", relative_path.is_relative()));
-  ASSERT(("starting_dir should be an absolute path.", starting_dir.is_absolute()));
-  auto return_value = ddio_FindRealPathImplementation(relative_path, starting_dir);
-  ASSERT(("return_value should be an absolute path.", return_value.is_absolute()));
+  if (starting_dirs.empty()) {
+    starting_dirs = Base_directories;
+  }
+
+  std::filesystem::path return_value;
+  for (auto starting_dir : starting_dirs) {
+    ASSERT(("starting_dir should be an absolute path.", starting_dir.is_absolute()));
+    return_value = ddio_FindRealPathImplementation(relative_path, starting_dir);
+    ASSERT(("return_value should be an absolute path.", return_value.is_absolute()));
+    if (std::filesystem::exists(return_value)) {
+      return return_value;
+    }
+  }
   return return_value;
 }

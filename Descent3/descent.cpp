@@ -752,6 +752,14 @@ const char *GetCDVolume(int cd_num) {
   }
 }
 
+
+//	not all Base_directories are necessarily writable, but this function
+//	will return one that should be writable
+std::filesystem::path GetWritableBaseDirectory() {
+  return Base_directories.back().c_str();
+}
+
+
 struct file_vols {
   char file[_MAX_PATH];
   char localpath[_MAX_PATH * 2];

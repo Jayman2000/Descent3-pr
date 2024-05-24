@@ -609,5 +609,5 @@ int ddio_GetPID() {
 
 // TODO: Doc comment
 std::filesystem::path ddio_FindRealPathImplementation(std::filesystem::path relative_path, std::filesystem::path starting_dir) {
-  return Base_directory / relative_path;
+  return starting_dir / relative_path;
 }

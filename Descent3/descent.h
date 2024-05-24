@@ -129,6 +129,8 @@
 #define _DESCENT_H
 
 #include <stdlib.h>
+#include <filesystem>
+#include <vector>
 #include "application.h"
 
 // The name of this product
@@ -178,8 +180,21 @@ extern bool Descent_overrided_intro;
 // How long the a mission name can be
 #define MSN_NAMELEN 32
 
-// The "root" directory of the D3 file tree
-extern char Base_directory[];
+// The "root" directories of the D3 file tree
+//
+// Directories that come first override directories that come later. For
+// example, if Base_directories[0] / "d3_linux.hog" exists and
+// Base_directories[1] / "d3_linux.hog" also exists, then the one in
+// Base_directories[0] will get used. The one in Base_directories[1] will be
+// ignored. This allows you to write code like this:
+//
+// for (auto directory : Base_directories) {
+//  if(file_we_need_is_in(directory)) {
+//    use_file_thats_in(directory);
+//    break;
+//  }
+// }
+extern std::vector<std::filesystem::path> Base_directories;
 
 //	---------------------------------------------------------------------------
 //	Globals
@@ -226,5 +241,9 @@ inline void DELAY(float secs) { Descent->delay(secs); }
 void D3DebugStopHandler();
 void D3DebugResumeHandler();
 #endif
+
+//	not all Base_directories are necessarily writable, but this function
+//	will return one that should be writable
+std::filesystem::path GetWritableBaseDirectory();
 
 #endif
