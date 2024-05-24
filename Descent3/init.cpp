@@ -1388,13 +1388,14 @@ void LoadGameSettings() {
 */
 void InitIOSystems(bool editor) {
   ddio_init_info io_info;
+  std::vector<std::filesystem::path> initial_base_directories = {};
 
-  // Set the base directory
+  // Set the writable base directory
   int dirarg = FindArg("-setdir");
   int exedirarg = FindArg("-useexedir");
-  std::filesystem::path initial_base_directory;
+  std::filesystem::path writable_base_directory;
   if (dirarg) {
-    initial_base_directory = GameArgs[dirarg + 1];
+    writable_base_directory = GameArgs[dirarg + 1];
   } else if (exedirarg) {
     char exec_path[_MAX_PATH];
     memset(exec_path, 0, sizeof(exec_path));
@@ -1403,15 +1404,30 @@ void InitIOSystems(bool editor) {
       Error("Failed to get executable path\n");
     } else {
       std::filesystem::path executablePath(exec_path);
-      initial_base_directory = executablePath.parent_path();
-      LOG_INFO << "Using working directory of " << Base_directory;
+      writable_base_directory = executablePath.parent_path();
+      LOG_INFO << "Using working directory of " << writable_base_directory.u8string().c_str();
     }
   } else {
-    initial_base_directory = std::filesystem::current_path();
+    writable_base_directory = std::filesystem::current_path();
   }
 
-  cf_Init(initial_base_directory);
-  ddio_SetWorkingDir(Base_directory.u8string().c_str());
+  ddio_SetWorkingDir(writable_base_directory.u8string().c_str());
+  initial_base_directories.insert(initial_base_directories.begin(), writable_base_directory);
+
+  // Set any additional base directories
+  auto additionaldirarg = 0;
+  while (0 != (additionaldirarg = FindArg("-additionaldir", additionaldirarg))) {
+    const auto dir_to_add = GetArg(additionaldirarg + 1);
+    if (dir_to_add == NULL) {
+      LOG_WARNING << "-additionaldir was at the end of the argument list. It should never be at the end of the argument list.";
+      break;
+    } else {
+      initial_base_directories.insert(initial_base_directories.begin(), std::filesystem::path(dir_to_add));
+      additionaldirarg += 2;
+    }
+  }
+
+  cf_Init(initial_base_directories);
 
   Descent->set_defer_handler(D3DeferHandler);
 
@@ -2031,7 +2047,7 @@ void SetupTempDirectory(void) {
     exit(1);
   }
   // restore working dir
-  ddio_SetWorkingDir(Base_directory.u8string().c_str());
+  ddio_SetWorkingDir(cf_GetWritableBaseDirectory().u8string().c_str());
 }
 
 void DeleteTempFiles() {

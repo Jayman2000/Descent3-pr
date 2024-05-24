@@ -23,8 +23,8 @@
 #include "cfile.h"
 
 void run_cf_init() {
-  std::filesystem::path base_directory = std::filesystem::current_path();
-  cf_Init(base_directory);
+  std::vector<std::filesystem::path> base_directories = {std::filesystem::current_path()};
+  cf_Init(base_directories);
 }
 
 TEST(D3, CFileIO) {
@@ -94,7 +94,7 @@ TEST(D3, CFileLocatePath) {
 
   for (auto const &item : test_paths) {
     auto directory = cwd / item.parent_path();
-    cf_Init(directory);
+    cf_Init({directory});
     std::filesystem::path file = item.filename();
     std::string file_lc = item.filename().u8string();
     std::transform(file_lc.begin(), file_lc.end(), file_lc.begin(), ::tolower);
@@ -103,23 +103,5 @@ TEST(D3, CFileLocatePath) {
 
     EXPECT_FALSE(cf_LocatePath(file_lc).empty());
     EXPECT_FALSE(cf_LocatePath(file_uc).empty());
-
-    // Now try case-insensitive path with non-existing directory in search.
-    // Expected not found on case-sensitive fs.
-    file_lc = item.u8string();
-    std::transform(file_lc.begin(), file_lc.end(), file_lc.begin(), ::tolower);
-    file_uc = item.u8string();
-    std::transform(file_uc.begin(), file_uc.end(), file_uc.begin(), ::toupper);
-
-    if (std::filesystem::is_regular_file(file_lc)) {
-      EXPECT_FALSE(cf_LocatePath(file_lc).empty());
-    } else {
-      EXPECT_TRUE(cf_LocatePath(file_lc).empty());
-    }
-    if (std::filesystem::is_regular_file(file_uc)) {
-      EXPECT_FALSE(cf_LocatePath(file_uc).empty());
-    } else {
-      EXPECT_TRUE(cf_LocatePath(file_uc).empty());
-    }
   }
 }

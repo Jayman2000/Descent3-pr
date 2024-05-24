@@ -55,8 +55,15 @@ struct library {
   FILE *file = nullptr; // pointer to file for this lib, if no one using it
 };
 
-// The "root" directory of the D3 file tree
-std::filesystem::path Base_directory;
+/* The "root" directories of the D3 file tree
+ *
+ * Directories that come first override directories that come later. For
+ * example, if Base_directories[0] / "d3.hog" exists and
+ * Base_directories[1] / "d3.hog" also exists, then the one in
+ * Base_directories[0] will get used. The one in Base_directories[1] will be
+ * ignored.
+ */
+std::vector<std::filesystem::path> Base_directories;
 
 // Map of paths. If value of entry is true, path is only for specific extensions
 std::map<std::filesystem::path, bool> paths;
@@ -73,17 +80,16 @@ cfile_error cfe;
 const char *eof_error = "Unexpected end of file";
 
 // This function must be called before you use anything else from this module.
-void cf_Init(std::filesystem::path initial_base_directory) {
-  Base_directory = initial_base_directory;
+void cf_Init(std::vector<std::filesystem::path> initial_base_directories) {
+  Base_directories = initial_base_directories;
 }
 
 #ifdef WIN32
-std::filesystem::path cf_LocatePathCaseInsensitiveHelper(std::filesystem::path relative_path) {
-  return Base_directory / relative_path;
+std::filesystem::path cf_LocatePathCaseInsensitiveHelper(const std::filesystem::path &relative_path, const std::filesystem::path &starting_dir) {
+  return starting_dir / relative_path;
 }
 #else
-std::filesystem::path cf_LocatePathCaseInsensitiveHelper(const std::filesystem::path &relative_path) {
-  auto &starting_dir = Base_directory;
+std::filesystem::path cf_LocatePathCaseInsensitiveHelper(const std::filesystem::path &relative_path, const std::filesystem::path &starting_dir) {
   // Dumb check, maybe there already all ok?
   if (exists((starting_dir / relative_path))) {
     return starting_dir / relative_path;
@@ -120,20 +126,63 @@ std::filesystem::path cf_LocatePathCaseInsensitiveHelper(const std::filesystem::
 }
 #endif
 
+std::vector<std::filesystem::path> cf_LocatePathMultiplePathsHelper(std::filesystem::path relative_path, bool stop_after_first_result) {
+  ASSERT(("realative_path should be a relative path.", relative_path.is_relative()));
+  std::vector<std::filesystem::path> return_value = { };
+  for (auto base_directory : Base_directories) {
+    ASSERT(("base_directory should be an absolute path.", base_directory.is_absolute()));
+    auto to_append = cf_LocatePathCaseInsensitiveHelper(relative_path, base_directory);
+    ASSERT(("to_append should be either empty or an absolute path.", to_append.empty() || to_append.is_absolute()));
+    if (std::filesystem::exists(to_append)) {
+      return_value.insert(return_value.begin(), to_append);
+      if (stop_after_first_result) {
+        break;
+      }
+    }
+  }
+  return return_value;
+}
+
 /**
- * Tries to find a relative path inside of Base_directory.
+ * Tries to find a relative path inside of one of the Base_directories.
  *
  * @param relative_path A relative path that we’ll hopefully find in
- *                      Base_directory. You don’t have to get the capitalization
- *                      of relative_path correct, even on macOS and Linux.
+ *                      one of the Base_directories. You don’t have to get the
+ *                      capitalization of relative_path correct, even on macOS
+ *                      and Linux.
  *
- * @return If the path is found, an absolute path that’s inside
- *         Base_directory. Otherwise, a path that probably doesn’t exist
- *         will be returned.
+ * @return Either an absolute path that’s inside a base directory or an empty
+ *         path if nothing is found.
  */
 std::filesystem::path cf_LocatePath(std::filesystem::path relative_path) {
-  ASSERT(("realative_path should be a relative path.", relative_path.is_relative()));
-  return cf_LocatePathCaseInsensitiveHelper(relative_path);
+  auto return_value_list = cf_LocatePathMultiplePathsHelper(relative_path, true);
+  if (return_value_list.empty()) {
+    return "";
+  } else {
+    return return_value_list[0];
+  }
+}
+
+/**
+ * Tries to find multiple relative paths inside of the Base_directories.
+ *
+ * @param relative_path A relative path that we’ll hopefully find in
+ *                      one or more of the Base_directories. You don’t have to
+ *                      get the capitalization of relative_path correct, even on
+ *                      macOS and Linux.
+ *
+ * @return A list of absolute paths. Each path will be inside one of the
+ *         Base_directories.
+ */
+std::vector<std::filesystem::path> cf_LocateMultiplePaths(std::filesystem::path relative_path) {
+  return cf_LocatePathMultiplePathsHelper(relative_path, false);
+}
+
+/* Not all Base_directories are necessarily writable, but this function will
+ * return one that should be writable.
+ */
+std::filesystem::path cf_GetWritableBaseDirectory() {
+  return Base_directories.back();
 }
 
 // Generates a cfile error
@@ -150,8 +199,8 @@ static void cf_Close();
 static CFILE *open_file_in_lib(const char *filename);
 
 // Opens a HOG file.  Future calls to cfopen(), etc. will look in this HOG.
-// Parameters:  libname - path to the HOG file, relative to Base_directory.
-// NOTE:	libname must be valid for the entire execution of the program.  Therefore, Base_directory
+// Parameters:  libname - path to the HOG file, relative to one of the Base_directories.
+// NOTE:	libname must be valid for the entire execution of the program.  Therefore, Base_directories
 // 			must not change.
 // Returns: 0 if error, else library handle that can be used to close the library
 int cf_OpenLibrary(const std::filesystem::path &libname) {

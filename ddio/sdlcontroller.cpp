@@ -1401,7 +1401,7 @@ int CTLLex(const char *command) {
 void sdlgameController::parse_ctl_file(int devnum, const char *ctlname) {
   // parse each file until we find a name match, no name match, just return
   ddio_DoForeachFile(
-      Base_directory, std::regex(".*\\.ctl"), [this, &devnum, &ctlname](const std::filesystem::path &path) {
+      cf_GetWritableBaseDirectory(), std::regex(".*\\.ctl"), [this, &devnum, &ctlname](const std::filesystem::path &path) {
         InfFile file;
         bool found_name = false;
 

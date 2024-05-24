@@ -518,6 +518,9 @@ void GetMultiAPI(multi_api *api) {
   api->fp[109] = (int *)GetRankIndex;
   api->fp[110] = (int *)CheckGetD3M;
   api->fp[111] = (int *)ddio_DoForeachFile;
+  api->fp[112] = (int *)cf_LocatePath;
+  api->fp[113] = (int *)cf_LocateMultiplePaths;
+  api->fp[114] = (int *)cf_GetWritableBaseDirectory;
 
   // Variable pointers
   api->vp[0] = (int *)&Player_num;
@@ -525,7 +528,7 @@ void GetMultiAPI(multi_api *api) {
   api->vp[2] = (int *)&Game_is_master_tracker_game;
   api->vp[3] = (int *)&Game_mode;
   api->vp[4] = (int *)NULL; // Current_pilot; no longer a struct
-  api->vp[5] = (int *)&Base_directory;
+  api->vp[5] = (int *)&Base_directories;
   api->vp[6] = (int *)&MultiDLLGameStarting;
   api->vp[7] = (int *)MTPilotinfo;
   api->vp[8] = (int *)&Num_network_games_known;
@@ -595,7 +598,7 @@ int LoadMultiDLL(const char *name) {
   if (MultiDLLHandle.handle)
     FreeMultiDLL();
 
-  std::filesystem::path dll_path_name = Base_directory / "online";
+  std::filesystem::path dll_path_name = cf_GetWritableBaseDirectory() / "online";
   ddio_DoForeachFile(dll_path_name, std::regex(".+\\.tmp"), [](const std::filesystem::path& path, ...) {
     std::error_code ec;
     std::filesystem::remove(path, ec);
@@ -618,8 +621,9 @@ int LoadMultiDLL(const char *name) {
 
   // Open the hog file
   if (!cf_OpenLibrary(lib_name)) {
-    ddio_MakePath(tmp_dll_name, Base_directory.u8string().c_str(), "online", name, NULL);
-    strcat(tmp_dll_name, ".d3c");
+    std::filesystem::path tmp_dll_path = std::filesystem::path("online") / name;
+    tmp_dll_path += ".d3c";
+    strncpy(tmp_dll_name, tmp_dll_path.u8string().c_str(), sizeof(tmp_dll_name));
     Multi_conn_dll_name[0] = 0;
     goto loaddll;
   }
