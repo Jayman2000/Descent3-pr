@@ -1,17 +1,20 @@
 cmake_minimum_required(VERSION 3.20)  # For using CMAKE_<LANG>_BYTE_ORDER
 
-if (NOT DEFINED ENV{VCPKG_ROOT})
-  message(FATAL_ERROR "
-    Please set an environment variable VCPKG_ROOT
-    For example:
-    export VCPKG_ROOT=/path/to/vcpkg
-    ")
-endif()
-set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
-set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
-if(CMAKE_TOOLCHAIN_FILE STREQUAL VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
-  # prevent endless recursion
-  unset(VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
+option(USE_VCPKG "Install dependencies using vcpkg. Set this to OFF if you want to manually install dependnencies using another package manager." ON)
+if(USE_VCPKG)
+  if (NOT DEFINED ENV{VCPKG_ROOT})
+    message(FATAL_ERROR "
+      Please set an environment variable VCPKG_ROOT
+      For example:
+      export VCPKG_ROOT=/path/to/vcpkg
+      ")
+  endif()
+  set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
+  set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+  if(CMAKE_TOOLCHAIN_FILE STREQUAL VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
+    # prevent endless recursion
+    unset(VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
+  endif()
 endif()
 
 # set default cmake build type to Debug (None Debug Release RelWithDebInfo MinSizeRel)
