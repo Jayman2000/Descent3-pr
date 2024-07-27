@@ -22,7 +22,13 @@
 #include <gtest/gtest.h>
 #include "cfile.h"
 
+void run_cf_init() {
+  std::filesystem::path base_directory = std::filesystem::current_path();
+  cf_Init(base_directory);
+}
+
 TEST(D3, CFileIO) {
+  run_cf_init();
   int lib_handle = cf_OpenLibrary("TestDir/test.hog");
   CFILE *file_handle = cfopen("lowercase.txt", "rb");
   char buf[5];
@@ -43,6 +49,7 @@ TEST(D3, CFileIO) {
 }
 
 TEST(D3, CFileLibrary) {
+  run_cf_init();
   // First pass - without search path in "TestDir" (i.e. not search actual files in directory)
   // Second pass - with search path (files in directory goes first)
   for (int i = 0; i < 2; i++) {

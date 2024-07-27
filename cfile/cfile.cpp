@@ -55,6 +55,9 @@ struct library {
   FILE *file = nullptr; // pointer to file for this lib, if no one using it
 };
 
+// The "root" directory of the D3 file tree
+std::filesystem::path Base_directory;
+
 // Map of paths. If value of entry is true, path is only for specific extensions
 std::map<std::filesystem::path, bool> paths;
 
@@ -68,6 +71,11 @@ int lib_handle = 0;
 cfile_error cfe;
 // The message for unexpected end of file
 const char *eof_error = "Unexpected end of file";
+
+// This function must be called before you use anything else from this module.
+void cf_Init(std::filesystem::path initial_base_directory) {
+  Base_directory = initial_base_directory;
+}
 
 // Generates a cfile error
 void ThrowCFileError(int type, CFILE *file, const char *msg) {
